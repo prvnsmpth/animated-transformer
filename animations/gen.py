@@ -2,14 +2,49 @@ import numpy as np
 
 from manim import *
 
+VOCAB = {
+    'the': 3206,
+    'robots': 2736,
+    'will': 3657,
+    'bring': 400,
+    'prosperity': 2532,
+    'aardvark': 14,
+    'apple': 177,
+    'box': 392,
+    'cardboard': 477
+}
+
+WORD_EMB = {
+    'the': [0.07213349, 0.13476127, 0.63486506],
+    'robots': [0.8144936 , 0.51136212, 0.43797063],
+    'will': [0.61763848, 0.29474857, 0.80120351],
+    'bring': [0.5001875 , 0.15730688, 0.93133526],
+    'prosperity': [0.2479659 , 0.41104862, 0.23145515]
+}
+
+POS_EMB = {
+    '0': [0.3204288 , 0.11540252, 0.88234465],
+    '1': [0.14030786, 0.07085044, 0.40712213],
+    '2': [0.07433667, 0.47350997, 0.22633834],
+    '3': [0.80512473, 0.1189765 , 0.0632117 ]
+}
+
 class TwoColumnMapping(Scene):
 
-    def __init__(self, text, vectors, xlabel = None, ylabel = None):
+    def __init__(self, text, embeddings, xlabel = None, ylabel = None, quote_tokens=True, show_dot_row=False):
         self.text = text
-        self.vectors = vectors
+        self.vectors = [embeddings[t] for t in text.split(' ')]
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.quote_tokens = quote_tokens
+        self.show_dot_row = show_dot_row
         super().__init__()
+
+        self.camera.background_color = WHITE
+        Text.set_default(color=BLACK)
+        Tex.set_default(color=BLACK)
+        Arrow.set_default(color=BLACK)
+        BraceLabel.set_default(color=BLACK)
 
     def construct(self):
         self.show_embeddings() 
@@ -23,10 +58,13 @@ class TwoColumnMapping(Scene):
         arrow_group = VGroup()
 
         for (i, word) in enumerate(words):
-            word_obj = Text(f'"{word}"')
+            word_obj = Text(f'"{word}"') if self.quote_tokens else Text(word)
             arrow_obj = Arrow(start=LEFT, end=RIGHT)
-            embedding = [ Tex(x) for x in self.vectors[i] ]
-            if len(self.vectors[i]) > 1:
+            word_value = self.vectors[i]
+            if not isinstance(word_value, list):
+                word_value = [word_value]
+            embedding = [ Tex(f'{x:.2f}') if type(x) == 'float' else Tex(x) for x in word_value ]
+            if len(embedding) > 1:
                 embedding.insert(-1, Tex("\\dots"))
 
             vector_obj = VGroup(*list(embedding))
@@ -40,32 +78,33 @@ class TwoColumnMapping(Scene):
             vector_group += vector_obj
             arrow_group += arrow_obj
 
-        word_dots = Tex("\\vdots")
-        grid += word_dots
-        word_group += word_dots
-        dot_arrow = Arrow(start=LEFT, end=RIGHT)
-        arrow_group += dot_arrow
-        grid += dot_arrow
-        vector_dots = Tex("\\vdots")
-        vector_group += vector_dots
-        grid += vector_dots
+        if self.show_dot_row:
+            word_dots = Tex("\\vdots")
+            grid += word_dots
+            word_group += word_dots
+            dot_arrow = Arrow(start=LEFT, end=RIGHT)
+            arrow_group += dot_arrow
+            grid += dot_arrow
+            vector_dots = Tex("\\vdots")
+            vector_group += vector_dots
+            grid += vector_dots
 
-        grid.arrange_in_grid(5, 3, buff=0.4)
+        grid.arrange_in_grid(len(words) if not self.show_dot_row else len(words) + 1, 3, buff=0.4)
 
         if self.xlabel:
-            word_brace = Brace(grid, direction=LEFT).set_color(GREEN)
-            word_label = word_brace.get_text(self.xlabel).rotate(np.pi / 2).set_color(GREEN)
+            word_brace = BraceLabel(grid, self.xlabel, brace_direction=LEFT).set_color(GREEN_E)
+            word_brace.label.rotate(np.pi / 2).set_color(GREEN_E).shift(RIGHT * 0.5)
 
         if self.ylabel:
-            dim_brace = Brace(vector_group, direction=UP).set_color(BLUE)
-            dim_label = dim_brace.get_text(self.ylabel).set_color(BLUE)
+            dim_brace = BraceLabel(vector_group, self.ylabel, brace_direction=UP).set_color(BLUE_E)
+            # dim_label = dim_brace.get_text(self.ylabel).set_color(BLUE)
 
         self.add(word_group)
         if self.xlabel:
-            self.play(FadeIn(word_brace, word_label))
+            self.play(FadeIn(word_brace))
         self.play(FadeIn(arrow_group))
         if self.ylabel:
-            self.play(FadeIn(vector_group, dim_brace, dim_label))
+            self.play(FadeIn(vector_group, dim_brace))
         else:
             self.play(FadeIn(vector_group))
 
@@ -74,28 +113,37 @@ class TwoColumnMapping(Scene):
 
 class TransformerFunc(Scene):
 
-    def __init__(self, show_tokenization=False):
+    def __init__(self, show_tokenization=True):
         super().__init__()
         self.show_tokenization = show_tokenization
 
+        # Light mode
+        self.camera.background_color = WHITE
+        Text.set_default(color=BLACK)
+        Tex.set_default(color=BLACK)
+
     def construct(self):
 
-        title1 = Text("The GPT function").move_to(UP * 2).scale(0.6)
+        title1 = Text("The Transformer as a function").move_to(UP * 2).scale(0.6)
         title2 = Text("Given word sequence, return next word").move_to(UP * 2).scale(0.6)
         title3 = Text("...with tokenization").move_to(UP * 2).scale(0.6)
 
-        p1 = Tex("$GPT($")
-        p2 = Tex("$X$").set_color(BLUE)
+        p1 = Tex("$Transformer($")
+        p2 = Tex("$X$").set_color(BLUE_E)
         p3 = Tex("$) \\rightarrow$")
-        p4 = Tex("$Y$").set_color(GREEN)
+        p4 = Tex("$Y$").set_color(GREEN_E)
         eq_group = VGroup(p1, p2, p3, p4)
         eq_group.arrange()
 
-        p2_words = Tex("$``the \\; robots\\;  are\\;  coming\"$").shift(LEFT).set_color(BLUE)
-        p4_word = Tex("$``tonight\"$").next_to(p2_words, RIGHT * 5).set_color(GREEN)
+        sentence = "the robots will bring prosperity".split(' ')
+        prompt = sentence[:-1]
+        answer = sentence[-1]
+        p2_words = MathTex('``' + '\\;'.join(prompt) + '"').shift(LEFT).set_color(BLUE_E)
+        p4_word = MathTex(f'``{answer}"').next_to(p2_words, RIGHT * 5).set_color(GREEN_E)
 
-        p2_ids = Tex("$[39, 12, 104, 108]$").set_color(BLUE)
-        p4_id = Tex("$899$").next_to(p2_ids, RIGHT * 5).set_color(GREEN)
+        sentence_token_ids = [VOCAB[word] for word in sentence]
+        p2_ids = MathTex(str(sentence_token_ids)).set_color(BLUE_E)
+        p4_id = MathTex(str(VOCAB[answer])).next_to(p2_ids, RIGHT * 5).set_color(GREEN_E)
 
         self.play(Write(title1), FadeIn(eq_group))
         self.wait(1)
@@ -118,33 +166,23 @@ class TransformerFunc(Scene):
 class PositionEmbeddings(TwoColumnMapping):
 
     def __init__(self):
-        super().__init__("0 1 2 3", [
-            [0.60, 0.49, 0.79],
-            [0.26, 0.65, 0.78],
-            [0.10, 0.80, 0.63],
-            [0.93, 0.71, 0.64]
-        ], xlabel="T = (up to) 1024", ylabel="C = 786")
+        positions = [str(x) for x in list(range(4))]
+        super().__init__(' '.join(positions), POS_EMB, xlabel=f"T = {len(positions)}", ylabel="C = 786", quote_tokens=False)
 
 
 class WordEmbeddings(TwoColumnMapping):
 
     def __init__(self):
-        super().__init__("39(the) 12(robots) 104(are) 108(coming)", [
-            [0.31, 0.48, 0.41],
-            [0.35, 0.24, 0.69],
-            [0.51, 0.02, 0.63],
-            [0.63, 0.77, 0.03]
-        ], xlabel="T = (up to) 1024", ylabel="C = 786")
+        sentence = "the robots will bring"
+        sentence_tokens = sentence.split(' ')
+        # input_str = ' '.join([f'{word}({VOCAB[word]})' for word in sentence_tokens])
+        super().__init__(sentence, WORD_EMB, xlabel=f"T = {len(sentence_tokens)}", ylabel="C = 786")
 
 class Tokenization(TwoColumnMapping):
 
     def __init__(self):
-        super().__init__("aardvark apple box cardboard", [
-            [13],
-            [42],
-            [314],
-            [271]
-        ], xlabel="All words", ylabel="Unique ID")
+        sentence = "aardvark apple box cardboard"
+        super().__init__(sentence, VOCAB, xlabel="All\\; words", ylabel="Unique\\; ID", show_dot_row=True)
 
 
 class SelfAttention(Scene):

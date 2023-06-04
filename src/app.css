@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "AtlasGrotesk";
+  src: url("$lib/assets/fonts/AtlasGrotesk-Regular-Web.woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "AtlasGrotesk";
+  src: url("$lib/assets/fonts/AtlasGrotesk-Bold-Web.woff2");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Canela";
+  src: url("$lib/assets/fonts/Canela-Bold-Web.woff2");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Publico";
+  src: url("$lib/assets/fonts/PublicoText-Roman-Web.woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Publico";
+  src: url("$lib/assets/fonts/PublicoText-Bold-Web.woff2");
+  font-weight: 700;
+}
