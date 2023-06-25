@@ -10,4 +10,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 **/__pycache__
-animations/media
+
+**/partial_movie_files/
+**/media/texts/
+**/media/Tex/
+
