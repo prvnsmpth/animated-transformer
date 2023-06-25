@@ -364,8 +364,8 @@
 
         <p>
           In this case, our Transformer has assigned a probability of 92% on &ldquo;prosperity&rdquo; being the next token, while there's only a 10% chance of &ldquo;destruction&rdquo;, so our
-          completed sentence now reads: &ldquo;the robots will bring prosperity&rdquo;. We can now rest easy with the knowledge that AI's imminent takeover of human civilization promises a future
-          of prosperity and well-being rather than death and destruction.
+          completed sentence now reads: &ldquo;the robots will bring prosperity&rdquo;. I suppose we can now rest easy with the knowledge that AI's imminent takeover of human civilization 
+          promises a future of prosperity and well-being, rather than death and destruction.
         </p>
 
       </section>
