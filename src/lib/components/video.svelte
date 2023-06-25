@@ -27,7 +27,8 @@
       if (!(e.buttons & 1)) return // mouse not down
     }
 
-    const clientX = e.type === 'touchmove' ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX
+    const clientX =
+      e.type === 'touchmove' ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX
     const { left, right } = video.getBoundingClientRect()
     time = (duration * (clientX - left)) / (right - left)
   }
@@ -49,17 +50,42 @@
   }
 </script>
 
-<video
-  bind:this={video}
-  {src}
-  on:mousemove={handleMove}
-  on:touchmove|preventDefault={handleMove}
-  on:mousedown={handleMousedown}
-  on:mouseup={handleMouseup}
-  bind:currentTime={time}
-  bind:duration
-  bind:paused
-  autoplay muted loop playsinline
->
-  <track kind="captions" />
-</video>
+<div class="relative">
+  <video
+    bind:this={video}
+    {src}
+    on:mousemove={handleMove}
+    on:touchmove|preventDefault={handleMove}
+    on:mousedown={handleMousedown}
+    on:mouseup={handleMouseup}
+    bind:currentTime={time}
+    bind:duration
+    bind:paused
+    autoplay
+    muted
+    loop
+    playsinline
+  >
+    <track kind="captions" />
+  </video>
+
+  {#if paused}
+    <div class="absolute z-10 top-0 left-0">
+      <svg
+        height="36px"
+        style="enable-background:new 0 0 512 512;"
+        viewBox="0 0 512 512"
+        width="36px"
+      >
+        <g>
+          <path
+            d="M224,435.8V76.1c0-6.7-5.4-12.1-12.2-12.1h-71.6c-6.8,0-12.2,5.4-12.2,12.1v359.7c0,6.7,5.4,12.2,12.2,12.2h71.6   C218.6,448,224,442.6,224,435.8z"
+          />
+          <path
+            d="M371.8,64h-71.6c-6.7,0-12.2,5.4-12.2,12.1v359.7c0,6.7,5.4,12.2,12.2,12.2h71.6c6.7,0,12.2-5.4,12.2-12.2V76.1   C384,69.4,378.6,64,371.8,64z"
+          />
+        </g>
+      </svg>
+    </div>
+  {/if}
+</div>
