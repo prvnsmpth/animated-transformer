@@ -21,7 +21,7 @@
   import GeneratingText from '$lib/animations/media/videos/gen/1080p60/GeneratingText.mp4'
 </script>
 
-<main class="flex justify-center items-start h-screen pt-40">
+<main class="flex justify-center items-start h-screen pt-20 2xl:pt-40">
   <div class="max-w-4xl px-4 py-4">
     <article
       class="prose-lg prose-h1:font-headline prose-headings:font-subheadline prose-h4:font-para prose-p:font-para prose-li:font-para"
