@@ -27,4 +27,6 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Build svelte app
-        run: npm run build
+        run: |
+          npm install
+          npm run build
