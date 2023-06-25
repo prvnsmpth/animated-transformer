@@ -18,6 +18,7 @@
   import FeedFwd from '$lib/animations/media/videos/gen/1080p60/FeedFwd.mp4'
   import GoingDeeper from '$lib/animations/media/videos/gen/1080p60/GoingDeeper.mp4'
   import Prediction from '$lib/animations/media/videos/gen/1080p60/Prediction.mp4'
+  import GeneratingText from '$lib/animations/media/videos/gen/1080p60/GeneratingText.mp4'
 </script>
 
 <main class="flex justify-center items-start h-screen pt-40">
@@ -38,7 +39,7 @@
         <p>
           The Transformer is foundational to the recent advancements in large language models
           (LLMs). In this article, we will attempt to unravel some of its inner workings and
-          hopefully gain some insight into how these models operate.
+          hopefully gain some insight into how these models function.
         </p>
         <p>
           The only prerequisite for following along with this article is a basic understanding of
@@ -86,7 +87,7 @@
         <div class="flex flex-col justify-center 2xl:flex-row align-top">
           <p>
             The model parameters, denoted by &theta;, are the set of weights of the model that are
-            tuned to the training data. We will take a peek into what &theta; contains, in later
+            tuned to the training data. We will take a peek into what &theta; contains, in each of the following
             sections.
           </p>
         </div>
@@ -129,9 +130,13 @@
 
       <Note>
         In this article we only discuss the architecture of auto-regressive, decoder-only
-        Transformers, like the GPT family of models from OpenAI.
-        <br />
-        <br />
+        Transformers, like the GPT family of models from OpenAI. For simplicity, we do not consider encoder-decoder 
+        architectures such as the one described in the seminal &ldquo;Attention is All You Need&rdquo; 2017 paper.
+        <p>
+          We also do not cover model training, i.e., how the model parameters for the Transformer are tweaked and tuned
+          to data (doing so would have made this already very long article unbearably long). 
+          Instead we take a trained model, and walk through the computation that takes place during inference.
+        </p>
         Most of the details described here come from the excellent
         <a
           href="https://github.com/karpathy/nanoGPT/blob/master/model.py"
@@ -171,6 +176,8 @@
           embedding for each token:
         </p>
         <Video src={PreparingEmbeddings} />
+
+        <p>The token and position embeddings are all part of &theta;, the model parameters, which means they are tuned during model training.</p>
       </section>
 
       <section>
@@ -184,12 +191,15 @@
         </p>
         <Video src={QKV} />
 
+        <p>The weight matrices that produce <code>Q, K, V</code> matrices are all part of &theta;.</p>
+
         <p>
           The query, key and value vectors for each token are packed together into <code
             >T &times; C</code
           > matrices, just like the input embedding matrix. These vectors are the primary participants
           involved in the main event which is coming up shortly: self-attention.
         </p>
+
       </section>
 
       <section>
@@ -284,7 +294,7 @@
       </section>
 
       <section>
-        <h2>5. Bringing all heads together</h2>
+        <h2>5. Putting all heads together</h2>
 
         <p>
           The final output for each head of self-attention is a matrix <code>Y</code> of dimensions
@@ -312,13 +322,14 @@
       </section>
 
       <section>
-        <h2>7. Feed forward</h2>
+        <h2>6. Feed forward</h2>
 
         <p>
           Everything we have done up to this point has involved only linear operations - i.e.,
           matrix multiplications. This is not sufficient to capture complex relationships between
           tokens, so the Transformer introduces a single hidden-layer neural network (also referred
-          to as a feed forward network, or a multi-layer perceptron (MLP)), with non-linearity.
+          to as a <b>feed forward network</b>, or a <b>multi-layer perceptron (MLP)</b>), with
+          non-linearity.
         </p>
         <Video src={FeedFwd} />
 
@@ -328,19 +339,22 @@
           by way of a linear transform, a non-linear function like ReLU is applied, and finally the vectors
           are linearly transformed back to vectors of length <code>C</code>.
         </p>
+
+        <p>All the weight matrices involved in the feed forward network are part of &theta;.</p>
       </section>
 
       <section>
         <h2>7. We need to go deeper</h2>
 
         <p>
-          All the steps in Sections 2 to 6 above constitute a single <b>Transformer block</b>. Each block takes as input
-          a <code>T &times; C</code> matrix, and outputs a <code>T &times; C</code> matrix.
+          All the steps in Sections 2 to 6 above constitute a single <b>Transformer block</b>. Each
+          block takes as input a <code>T &times; C</code> matrix, and outputs a
+          <code>T &times; C</code> matrix.
         </p>
 
         <p>
-          In order to arm our Transformer model with the ability to capture complex relationships between words, 
-          many such blocks are stacked together in sequence:
+          In order to arm our Transformer model with the ability to capture complex relationships
+          between words, many such blocks are stacked together in sequence:
         </p>
         <Video src={GoingDeeper} />
       </section>
@@ -377,16 +391,49 @@
         </p>
       </section>
 
-      <Note>
-        To focus on the most important aspects of a Transformer's implementation, several details were intentionally left out. 
-        Some of these include: layer normalization, dropout, residual connections, etc.
-        <br><br>
-        Read the full
-        <a
-          href="https://github.com/karpathy/nanoGPT/blob/master/model.py"
-          target="_blank"
-          class="underline">nanoGPT implementation</a> to get all the details.
-      </Note>
+      <section>
+        <h2>9. Text Generator Go Brrr</h2>
+
+        <p>The Transformer generates text one token at a time:</p>
+        <Video src={GeneratingText} />
+
+        <p>
+          The first token that the model produces is added to the prompt and fed back into it to
+          produce the second token, which is then fed into it to produce the third, and so on. The
+          Transformer has a limit on the maximum number of tokens (N) that it can take as input, and
+          so as the number of generated tokens increases, eventually we need to either cap the
+          number of tokens to keep only the last N, or devise some other technique for shortening
+          the prompt without losing information from the oldest tokens.
+        </p>
+      </section>
+
+      <section>
+        <h2>And that's it!</h2>
+
+        <p>
+          If you made it all the way to the end, well done! I hope this was worthwhile and
+          contributed in some way to your understanding of LLMs.
+        </p>
+
+        <Note>
+          To focus on the most important aspects of a Transformer's implementation, several details
+          were intentionally left out. Some of these include: layer normalization, dropout, residual
+          connections, etc.
+          <br /><br />
+          I highly recommend reading the full
+          <a
+            href="https://github.com/karpathy/nanoGPT/blob/master/model.py"
+            target="_blank"
+            class="underline">nanoGPT implementation</a
+          > to get all the details.
+        </Note>
+
+        <p>
+          This project was made with <a href="https://github.com/ManimCommunity/manim"  target="_blank" class="underline text-blue-500 font-bold">Manim</a>, a
+          Python library for mathematical animations, created by Grant Sanderson who runs the
+          YouTube channel <a target="_blank" class="underline text-blue-500 font-bold" href="https://www.youtube.com/c/3blue1brown">3Blue1Brown</a> (which you should definitely check out, BTW).
+        </p>
+      </section>
 
       <div class="h-10 mb-40" />
     </article>

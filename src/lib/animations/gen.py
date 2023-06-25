@@ -1182,8 +1182,78 @@ class Prediction(FeedFwd):
         self.wait(3)
 
 
-class GeneratingText(BaseScene):
+class GeneratingText(BaseSelfAttn):
+
+    def _make_tokens(self, tokens: list[str], color=BLUE_E) -> VGroup:
+        grp = VGroup()
+        for t in tokens:
+            label = Tex(t)
+            box = SurroundingRectangle(label, color=color)
+            grp.add(VGroup(label, box))
+        return grp
 
     def construct(self):
-        pass
+        title = Title("Generating text", match_underline_width_to_text=True)
+        self.add(title)
+
+        tf_label = Tex('Transformer')
+        tf_box = SurroundingRectangle(tf_label, buff=MED_LARGE_BUFF).set_color(BLACK)
+        tf_grp = VGroup(tf_label, tf_box).shift(DOWN)
+        self.add(tf_grp)
+
+        input_tokens = self._make_tokens(self.sentence_tokens)
+        input_tokens.arrange(buff=MED_SMALL_BUFF)
+        input_tokens.next_to(tf_grp, UP * 3)
+        input_window = SurroundingRectangle(input_tokens).set_color(BLACK)
+        input_window_label = Tex("Max prompt length = 5", font_size=28).next_to(input_window, UP, buff=SMALL_BUFF).align_to(input_window, LEFT)
+
+        in_arrow = Arrow(buff=0, start=input_window.get_bottom(), end=tf_grp.get_top())
+        out_arrow = Arrow(buff=0, start=tf_grp.get_bottom(), end=tf_grp.get_bottom() + DOWN * 0.7)
+        self.add(in_arrow, out_arrow, input_tokens, input_window, input_window_label)
+
+        max_window_sz = 5
+
+        for i in ["prosperity", "to", "humans", "jk", "lol"]:
+            input_copy = input_tokens.copy()[max(0, len(input_tokens) - max_window_sz):]
+            for b in input_copy:
+                b.generate_target()
+                b.target.move_to(tf_grp.get_center())
+                b.target.shift(IN)
+                b.target.width = 0
+                b.target.height = 0
+
+            self.play(*[MoveToTarget(b) for b in input_copy]) 
+
+            out_token = self._make_tokens([i], color=GREEN_E)[0]
+            out_token.generate_target()
+            out_token.move_to(tf_grp.get_center())
+            out_token.width = 0
+            out_token.height = 0
+            out_token.target.next_to(tf_grp, DOWN * 4)
+
+            self.play(ReplacementTransform(out_token, out_token.target))
+            self.wait()
+            out_token = out_token.target
+            out_token.generate_target()
+            for t in input_tokens:
+                t.generate_target()
+            new_input_tokens = VGroup(*[t.target for t in input_tokens], out_token.target).arrange(buff=MED_SMALL_BUFF).move_to(input_tokens)
+            num_new_tokens = len(new_input_tokens)
+            new_input_window = SurroundingRectangle(VGroup(*new_input_tokens[max(0, num_new_tokens - max_window_sz):])).set_color(BLACK)
+            self.play(
+                *[ReplacementTransform(t, t.target) for t in input_tokens], 
+                ReplacementTransform(out_token, out_token.target), 
+                ReplacementTransform(input_window, new_input_window),
+                input_window_label.animate.next_to(new_input_window, UP, buff=SMALL_BUFF).align_to(new_input_window, LEFT)
+            )
+            input_tokens = new_input_tokens
+            input_window = new_input_window
+            self.wait()
+
+        self.wait(3)
+
+
+
+
+
 
