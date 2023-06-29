@@ -34,10 +34,22 @@ class BaseScene(Scene):
     """Capture common methods for all scenes.
     """
 
+    ANIM_SPEED = 1.5
+
     def __init__(self):
         super().__init__()
         self.camera.background_color = WHITE
         Mobject.set_default(color=BLACK)
+
+    def wait(self, num_secs=1):
+        super().wait(num_secs * BaseScene.ANIM_SPEED)
+    
+    def play(self, *args, **kwargs):
+        if 'run_time' in kwargs:
+            kwargs['run_time'] *= BaseScene.ANIM_SPEED
+        else:
+            kwargs['run_time'] = 1.2
+        super().play(*args, **kwargs)
     
     def _make_matrix(self, embeddings, actual_h=None, actual_w=None):
         h, w = len(embeddings), len(embeddings[0])
@@ -63,7 +75,7 @@ class BaseScene(Scene):
         return VGroup(*text_objs)
     
 
-class TwoColumnMapping(Scene):
+class TwoColumnMapping(BaseScene):
 
     def __init__(self, text="robots", embeddings=WORD_EMB, xlabel = None, ylabel = None, quote_tokens=True, show_dot_row=False):
         self.text = text
@@ -146,7 +158,7 @@ class TwoColumnMapping(Scene):
         self.wait(4)
 
 
-class TransformerFunc(Scene):
+class TransformerFunc(BaseScene):
 
     def __init__(self, show_tokenization=True):
         super().__init__()
@@ -188,14 +200,14 @@ class TransformerFunc(Scene):
         self.play(LaggedStart(
             Write(title1), 
             FadeIn(eq_group), FadeIn(subtext), Create(subtext_box),
-            lag_ratio=0.25,
-            run_time=2))
-        self.wait()
+            lag_ratio=0.3,
+            run_time=3))
+        self.wait(2)
         eq_group = VGroup(p1, p2_words, p3, p4_word)
         self.play(
             FadeOut(title1), Write(title2),
             FadeOut(p2, p4), FadeIn(p2_words, p4_word), eq_group.animate.arrange())
-        self.wait()
+        self.wait(2)
 
         if self.show_tokenization:
             eq_group = VGroup(p1, p2_ids, p3, p4_id)
@@ -234,11 +246,11 @@ class WordEmbeddings(BaseScene):
         token_group = self.make_sentence_tokens()
         num_tokens = len(token_group)
         token_boxes = [t[1] for t in token_group]
-        self.play(*[FadeIn(t[0]) for t in token_group])
+        self.play(*[FadeIn(t[0]) for t in token_group], run_time=1)
 
-        self.play(*[Create(b) for b in token_boxes])
+        self.play(*[Create(b) for b in token_boxes], run_time=1)
         self.play(
-            token_group.animate.arrange_in_grid(num_tokens, 1, cell_alignment=RIGHT).shift(LEFT * 5).shift(DOWN))
+            token_group.animate.arrange_in_grid(num_tokens, 1, cell_alignment=RIGHT).shift(LEFT * 5).shift(DOWN), run_time=1)
 
         return token_group
     
@@ -284,7 +296,7 @@ class WordEmbeddings(BaseScene):
         emb_matrix = self._make_matrix([WORD_EMB[w] for w in self.sentence_tokens], actual_w=786)
         emb_matrix.shift(DOWN * 0.5)
 
-        self.wait()
+        self.wait(2)
         self.clear()
         title2 = Title("Token embedding matrix", match_underline_width_to_text=True)
         self.play(embedding_obj.animate.center().shift(DOWN * 0.5), Write(title2))
@@ -295,7 +307,7 @@ class WordEmbeddings(BaseScene):
             FadeIn(BraceLabel(emb_matrix, f'T = {len(self.sentence_tokens)}', LEFT).set_color(GREEN_E))
         )
 
-        self.wait(4)
+        self.wait(3)
 
 
 class PositionEmbeddings(WordEmbeddings):
@@ -309,12 +321,12 @@ class PositionEmbeddings(WordEmbeddings):
         token_group = self.make_sentence_tokens()
         num_tokens = len(token_group)
         token_boxes = [t[1] for t in token_group]
-        self.play(*[FadeIn(t[0]) for t in token_group])
+        self.play(*[FadeIn(t[0]) for t in token_group], run_time=1)
 
         token_labels = self.add_pos_labels(token_group)
         self.play(
             *[Create(b) for b in token_boxes],
-            *[FadeIn(p) for p in token_labels])
+            *[FadeIn(p) for p in token_labels], run_time=1)
         vert_labels = token_labels.copy()
         for l in vert_labels:
             l.set_color(BLUE_E)
@@ -324,7 +336,7 @@ class PositionEmbeddings(WordEmbeddings):
         ])
         vert_group.arrange_in_grid(num_tokens, 1, cell_alignment=RIGHT).shift(LEFT * 3).shift(DOWN * 1)
         
-        self.play(*[TransformMatchingShapes(g, t) for (g, t) in zip(token_group, vert_group)])
+        self.play(*[TransformMatchingShapes(g, t) for (g, t) in zip(token_group, vert_group)], run_time=1)
 
         return vert_group
     
@@ -338,6 +350,7 @@ class PositionEmbeddings(WordEmbeddings):
         emb_matrix = self._make_matrix([POS_EMB[str(i)] for i in range(len(self.sentence_tokens))], actual_w=768)
         emb_matrix.shift(DOWN * 0.5)
 
+        self.wait()
         self.clear()
         title2 = Title("Position embedding matrix", match_underline_width_to_text=True)
         self.play(emb_obj.animate.move_to(emb_matrix.get_center()), Write(title2))
@@ -346,7 +359,7 @@ class PositionEmbeddings(WordEmbeddings):
             FadeIn(BraceLabel(emb_matrix, "C = 786", UP).set_color(BLUE_E)), 
             FadeIn(BraceLabel(emb_matrix, f'T = {len(self.sentence_tokens)}', LEFT).set_color(GREEN_E)))
 
-        self.wait(4)
+        self.wait(3)
 
 
 class Vocabulary(TwoColumnMapping):
@@ -638,8 +651,8 @@ class SplittingHeads(BaseSelfAttn):
             VGroup(Tex(f'No. of heads = {self.n_head}'),
                 Tex(f'Head size (H) = $C / {self.n_head} = {self.head_sz}$')).arrange(DOWN)
         ).arrange(buff=LARGE_BUFF).next_to(eq1, DOWN, buff=LARGE_BUFF).scale(0.6)
-        self.play(Write(explain_msgs))
-        self.wait(2)
+        self.play(Write(explain_msgs), run_time=2)
+        self.wait()
 
         head_group = VGroup(*self.q_heads[:-1], Tex("\\dots"), self.q_heads[-1]).arrange().scale(0.7)
 
@@ -647,9 +660,10 @@ class SplittingHeads(BaseSelfAttn):
             *[TransformMatchingShapes(eq1.copy(), h) for h in head_group],
             FadeIn(BraceLabel(head_group, f'{self.n_head} heads of size {self.head_sz} each', label_constructor=Tex, brace_direction=DOWN, font_size=32).set_color(BLUE_E)),
             FadeOut(eq1, eq1_title),
-            FadeIn(*[BraceLabel(h, f'Q_{{{i + 1 if i < 2 else self.n_head}}}\\; (T \\times H)', UP, font_size=32, color=GREEN_E) for (i, h) in enumerate(head_group) if isinstance(h, MobjectMatrix)])
+            FadeIn(*[BraceLabel(h, f'Q_{{{i + 1 if i < 2 else self.n_head}}}\\; (T \\times H)', UP, font_size=32, color=GREEN_E) for (i, h) in enumerate(head_group) if isinstance(h, MobjectMatrix)]),
+            run_time=1
         )
-        self.wait(4)
+        self.wait(3)
 
 
 class SelfAttn(SplittingHeads):
@@ -706,6 +720,7 @@ class SelfAttn(SplittingHeads):
                     ReplacementTransform(last_col_box, col_boxes[0]),
                     res_rows[i][-1].animate.set_opacity(1.0)
                 )
+                self.wait(0.5)
         self.play(
             FadeOut(row_boxes[i + 1], col_boxes[0]), 
             # show remaining values in the result matrix
@@ -904,7 +919,7 @@ class SelfAttnPt2(SelfAttn):
         self.play(FadeTransform(v0.get_rows()[0], eq1[3]))
         self.wait()
         self.play(FadeTransform(v0.get_rows()[1], eq1[5]))
-        self.wait(2)
+        self.wait(3)
 
 
 class SelfAttnPt3(SelfAttnPt2):
@@ -957,10 +972,24 @@ class SelfAttnPt3(SelfAttnPt2):
             all_head_outs, f'12 heads of size H = {self.head_sz}', 
             brace_direction=DOWN, color=GREEN_E, label_constructor=Text,
             font_size=24) 
+
+        # first_head = all_head_outs[0]
+        # first_head_rows = first_head.get_rows()
+        # for (i, row) in enumerate(y0.get_rows()):
+        #     for (j, val) in enumerate(row):
+        #         val.target = first_head_rows[i][j]
+
+        y0.target = all_head_outs[0]
+
+        self.wait(0.5)
         self.play(
-            TransformMatchingShapes(y0_grp, all_head_outs[0]),
+            # TransformMatchingShapes(y0_grp, all_head_outs[0]),
+            # *[MoveToTarget(v) for row in y0.get_rows() for v in row]
+            ReplacementTransform(y0, y0.target),
+            FadeOut(y0_grp[1], y0_grp[2])
         )
 
+        self.wait(0.5)
         self.play(
             FadeIn(*all_head_outs[1:]),
             FadeIn(*head_titles),
@@ -976,6 +1005,7 @@ class SelfAttnPt3(SelfAttnPt2):
         y_combined_title = MathTex('Y\\; (T \\times C)', font_size=32).next_to(y_combined, UP)
         y_cmb_grp = VGroup(y_combined, y_combined_title)
 
+        self.wait(0.5)
         self.play(
             FadeTransform(VGroup(all_head_outs, *head_titles), y_cmb_grp),
             FadeOut(bottom_brace)
@@ -1004,13 +1034,13 @@ class FeedFwd(SelfAttnPt3):
     
     def construct(self):
         title = Title('Single hidden layer neural network on Y', match_underline_width_to_text=True)
-        self.play(Write(title))
+        self.play(Write(title), run_time=1)
 
         y_labels = self._make_row_labels(self.y_obj, self.sentence_tokens, dir=LEFT)
         y_title = MathTex('Y\\; (T \\times C)', font_size=36).next_to(self.y_obj, UP)
         y_expl = Text('The output of \nself attention: \none vector of size C \nper input word', font_size=24).next_to(self.y_obj, RIGHT)
         y_grp = VGroup(self.y_obj, y_labels, y_title)
-        self.play(FadeIn(y_grp), Write(y_expl))
+        self.play(LaggedStart(FadeIn(y_grp), Write(y_expl), lag_ratio=0.3), run_time=2)
         self.wait(2)
 
         scale = 0.7
@@ -1018,14 +1048,14 @@ class FeedFwd(SelfAttnPt3):
             FadeOut(y_expl),
             y_grp.animate.scale(scale).shift(LEFT * 2)
         )
-        self.wait()
+        self.wait(0.5)
 
         # Cheat and use W_v because I'm lazy
         w_obj = self._make_matrix(W_v, actual_h=self.n_embd, actual_w=self.n_embd * 4).scale(scale).shift(RIGHT * 2)
         w_title = MathTex('W_{nn}\\; (C \\times 4C)', font_size=36).next_to(w_obj, UP)
         y_expl_2 = Text('Linear transform each row: \nfrom word vectors of \nsize C to 4C', font_size=24).to_edge(DOWN)
-        self.play(FadeIn(w_obj, w_title), Write(y_expl_2))
-        self.wait(2)
+        self.play(LaggedStart(FadeIn(w_obj, w_title), Write(y_expl_2), lag_ratio=0.5), run_time=2)
+        self.wait(1.5)
 
         y_rows = self.y_obj.get_rows()
         y_row_boxes = [SurroundingRectangle(r) for r in y_rows]
@@ -1035,22 +1065,25 @@ class FeedFwd(SelfAttnPt3):
             self.play(ReplacementTransform(y_row_boxes[i], y_row_boxes[i + 1]))
 
         expl3 = Text('Hidden layer', font_size=24).to_edge(DOWN)
+        self.remove(y_expl_2)
         self.play(
-            FadeOut(y_row_boxes[-1], w_box, y_expl_2),
+            FadeOut(y_row_boxes[-1], w_box),
             FadeOut(y_grp, w_obj, w_title, shift=UP),
             FadeIn(self.yh_grp, shift=UP),
-            Write(expl3)
+            Write(expl3),
+            run_time=1.5
         )
         self.wait()
 
         expl4 = Text('Repeat linear transform \nfrom 4C to C \nafter applying non-linearity (ReLU)', font_size=24).to_edge(DOWN)
+        self.remove(expl3)
         self.play(
             FadeOut(self.yh_grp, shift=UP),
             FadeIn(self.yf_grp, shift=UP),
-            FadeOut(expl3),
-            Write(expl4)
+            Write(expl4),
+            run_time=2
         )
-        self.wait(2)
+        self.wait(3)
 
 
 class GoingDeeper(BaseScene):
@@ -1106,7 +1139,7 @@ class GoingDeeper(BaseScene):
             FadeOut(block_title, block_in, block_out, arrow1, arrow2),
             MoveToTarget(block1), FadeIn(*block_chain[1:], block1_title, block2_title, block50_title, arrow3)
         )
-        self.wait(2)
+        self.wait(3)
 
 
 class Prediction(FeedFwd):
@@ -1115,15 +1148,15 @@ class Prediction(FeedFwd):
         title = Title("Predicting the next token", match_underline_width_to_text=True)
         self.play(Write(title), run_time=1)
 
-        last_output_vec = self.yf_grp[0].get_rows()[-1]
+        last_output_vec = self.yf_grp[0].get_rows()[-1].copy()
         last_word_label = self.yf_labels[-1].copy()
         lt_box = SurroundingRectangle(last_output_vec)
         expl = Tex('Take the last $T \\times C$ output from the last block', font_size=36).to_edge(DOWN)
         self.play(
             FadeIn(self.yf_grp),
-            Create(lt_box),
             Write(expl)
         )
+        self.play(Create(lt_box))
         self.wait()
 
         expl2 = Tex(f'The output for ``{self.sentence_tokens[-1]}" represents the next word', font_size=36).to_edge(DOWN)
@@ -1148,12 +1181,14 @@ class Prediction(FeedFwd):
             FadeOut(self.yf_grp, lt_box),
             *[MoveToTarget(v) for v in last_output_vec],
             MoveToTarget(last_word_label),
-            FadeIn(lt_vec_obj),
+            # FadeIn(lt_vec_obj),
             FadeIn(lt_vec_label)
         )
 
-        self.wait()
+        self.play(FadeIn(lt_vec_obj))
+        self.remove(*[v for v in last_output_vec])
 
+        self.wait()
 
         expl3 = Tex(f'Linear transform and normalize to vector of size V (vocabulary size)', font_size=36).to_edge(DOWN)
         logits = self._make_matrix([[0.92], [0.2], [0.1], [0.008]], actual_h=100)
@@ -1213,6 +1248,7 @@ class GeneratingText(BaseSelfAttn):
 
         max_window_sz = 5
 
+        self.wait(1)
         for i in ["prosperity", "to", "humans", "jk", "lol"]:
             input_copy = input_tokens.copy()[max(0, len(input_tokens) - max_window_sz):]
             for b in input_copy:
