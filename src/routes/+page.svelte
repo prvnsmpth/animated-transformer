@@ -421,14 +421,14 @@
       <section>
         <h2>9. Text Generator Go Brrr</h2>
 
-        <p>The Transformer generates text one token at a time:</p>
+        <p>Now that we can predict the next token, we can generate text, one token at a time:</p>
         <Video src={GeneratingText} />
 
         <p>
           The first token that the model produces is added to the prompt and fed back into it to
-          produce the second token, which is then fed into it to produce the third, and so on. The
+          produce the second token, which is then fed back into it to produce the third, and so on. The
           Transformer has a limit on the maximum number of tokens (N) that it can take as input, and
-          so as the number of generated tokens increases, eventually we need to either cap the
+          therefore as the number of generated tokens increases, eventually we need to either cap the
           number of tokens to keep only the last N, or devise some other technique for shortening
           the prompt without losing information from the oldest tokens.
         </p>
