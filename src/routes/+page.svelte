@@ -215,8 +215,8 @@
 
           <p>
             Imagine you have a database of images with their text descriptions, and you would like
-            to build a search engine. Users of your search engine will search by providing some text
-            (the <b>query</b>), which will matched against the text descriptions in your database
+            to build an image search engine. Users will search by providing some text
+            (the <b>query</b>), which will be matched against the text descriptions in your database
             (the <b>key</b>), and the final result is the image itself (the <b>value</b>). 
             Only those images (values) whose corresponding text description (key) best matches 
             the user input (query) will be returned in the search results.
