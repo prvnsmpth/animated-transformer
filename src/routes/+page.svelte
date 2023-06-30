@@ -87,8 +87,8 @@
         <div class="flex flex-col justify-center 2xl:flex-row align-top">
           <p>
             The model parameters, denoted by &theta;, are the set of weights of the model that are
-            tuned to the training data. We will take a peek into what &theta; contains, in each of the following
-            sections.
+            tuned to the training data. We will take a peek into what &theta; contains, in each of
+            the following sections.
           </p>
         </div>
       </section>
@@ -130,12 +130,14 @@
 
       <Note>
         In this article we only discuss the architecture of auto-regressive, decoder-only
-        Transformers, like the GPT family of models from OpenAI. For simplicity, we do not consider encoder-decoder 
-        architectures such as the one described in the seminal &ldquo;Attention is All You Need&rdquo; 2017 paper.
+        Transformers, like the GPT family of models from OpenAI. For simplicity, we do not consider
+        encoder-decoder architectures such as the one described in the seminal &ldquo;Attention is
+        All You Need&rdquo; 2017 paper.
         <p>
-          We also do not cover model training, i.e., how the model parameters for the Transformer are tweaked and tuned
-          to data (doing so would have made this already very long article unbearably long). 
-          Instead we take a trained model, and walk through the computation that takes place during inference.
+          We also do not cover model training, i.e., how the model parameters for the Transformer
+          are tweaked and tuned to data (doing so would have made this already very long article
+          unbearably long). Instead we take a trained model, and walk through the computation that
+          takes place during inference.
         </p>
         Most of the details described here come from the excellent
         <a
@@ -177,7 +179,10 @@
         </p>
         <Video src={PreparingEmbeddings} />
 
-        <p>The token and position embeddings are all part of &theta;, the model parameters, which means they are tuned during model training.</p>
+        <p>
+          The token and position embeddings are all part of &theta;, the model parameters, which
+          means they are tuned during model training.
+        </p>
       </section>
 
       <section>
@@ -191,7 +196,9 @@
         </p>
         <Video src={QKV} />
 
-        <p>The weight matrices that produce <code>Q, K, V</code> matrices are all part of &theta;.</p>
+        <p>
+          The weight matrices that produce <code>Q, K, V</code> matrices are all part of &theta;.
+        </p>
 
         <p>
           The query, key and value vectors for each token are packed together into <code
@@ -200,6 +207,26 @@
           involved in the main event which is coming up shortly: self-attention.
         </p>
 
+        <Note>
+          <p>
+            But what are these queries, keys and values? One way to think about these vectors is
+            using the following analogy:
+          </p>
+
+          <p>
+            Imagine you have a database of images with their text descriptions, and you would like
+            to build a search engine. Users of your search engine will search by providing some text
+            (the <b>query</b>), which will matched against the text descriptions in your database
+            (the <b>key</b>), and the final result is the image itself (the <b>value</b>). 
+            Only those images (values) whose corresponding text description (key) best matches 
+            the user input (query) will be returned in the search results.
+          </p>
+
+          <p>
+            Self-attention works in a similar manner - the tokens in the user input are trying to &ldquo;query&rdquo;
+            other tokens to find the ones they should be paying attention to.
+          </p>
+        </Note>
       </section>
 
       <section>
@@ -429,9 +456,17 @@
         </Note>
 
         <p>
-          This project was made with <a href="https://github.com/ManimCommunity/manim"  target="_blank" class="underline text-blue-500 font-bold">Manim</a>, a
-          Python library for mathematical animations, created by Grant Sanderson who runs the
-          YouTube channel <a target="_blank" class="underline text-blue-500 font-bold" href="https://www.youtube.com/c/3blue1brown">3Blue1Brown</a> (which you should definitely check out, BTW).
+          This project was made with <a
+            href="https://github.com/ManimCommunity/manim"
+            target="_blank"
+            class="underline text-blue-500 font-bold">Manim</a
+          >, a Python library for mathematical animations, created by Grant Sanderson who runs the
+          YouTube channel
+          <a
+            target="_blank"
+            class="underline text-blue-500 font-bold"
+            href="https://www.youtube.com/c/3blue1brown">3Blue1Brown</a
+          > (which you should definitely check out, BTW).
         </p>
       </section>
 
