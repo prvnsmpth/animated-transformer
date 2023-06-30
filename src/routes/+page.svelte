@@ -34,6 +34,9 @@
           target="_blank">Praveen Sampath</a
         >
       </h6>
+      <div class="flex justify-center items-center mt-4">
+        <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-size="large" data-show-count="true">Tweet</a>
+      </div>
 
       <section>
         <p>
@@ -468,6 +471,15 @@
             href="https://www.youtube.com/c/3blue1brown">3Blue1Brown</a
           > (which you should definitely check out, BTW).
         </p>
+      </section>
+
+      <section>
+
+        <div class="w-full flex flex-col justify-center items-center">
+          <h2 class="text-center">Share this article</h2>
+          <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-size="large" data-show-count="true">Tweet</a>
+          <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
       </section>
 
       <div class="h-10 mb-40" />
