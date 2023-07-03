@@ -15,7 +15,15 @@
   openGraph={{
     url: 'https://prvnsmpth.github.io/animated-transformer',
     title: 'The Animated Transformer',
-    description: 'An intuitive explanation of the Transformer model architecture.'
+    description: 'An intuitive explanation of the Transformer model architecture.',
+    images: [
+      {
+        url: 'https://prvnsmpth.github.io/animated-transformer/og.png',
+        width: 1920,
+        height: 1080,
+        alt: 'The Animated Transformer'
+      }
+    ]
   }}
 />
 
