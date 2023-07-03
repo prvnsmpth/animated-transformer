@@ -18,7 +18,10 @@
     description: 'An intuitive explanation of the Transformer model architecture.',
     images: [
       {
-        url: 'https://prvnsmpth.github.io/animated-transformer/og.png'
+        url: 'https://prvnsmpth.github.io/animated-transformer/og.png',
+        width: 1920,
+        height: 1080,
+        alt: 'The Animated Transformer'
       }
     ]
   }}
